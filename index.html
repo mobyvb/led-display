@@ -1,0 +1,61 @@
+<html>
+    <head>
+        <title>LED display</title>
+        <style>
+            #panel {
+                background-color: white;
+                position: relative;
+                width: 700px;
+                height: 700px;
+                margin: auto;
+            }
+            .led {
+                border: 1px solid black;
+                width: 100px;
+                height: 100px;
+                position: absolute;
+                box-sizing: border-box;
+                text-align: center;
+                font-family: sans-serif;
+                padding-top: 40px;
+            }
+            .row0 {top: 0px;} .row1 {top: 100px;} .row2 {top: 200px} .row3 {top: 300px;} .row4 {top: 400px} .row5 {top: 500px} .row6 {top: 600px}
+            .col0 {left: 0px;} .col1 {left: 100px;} .col2 {left: 200px} .col3 {left: 300px;} .col4 {left: 400px} .col5 {left: 500px} .col6 {left: 600px}
+        </style>
+    </head>
+
+    <body>
+        <div id='panel'></div>
+
+        <script src='/socket.io/socket.io.js'></script>
+        <script src='/jquery.js'></script>
+        <script>
+            var width = 7;
+            var height = 7;
+            var verticalDirection = -1;
+            var y = height - 1;
+            var ledNum = 0;
+            for (var x = 0; x < width; x++) {
+                for (; y >= 0 && y < height; y += verticalDirection) {
+                    $('#panel').append('<div class="led col' + x + ' row' + y + '" id="led' + ledNum + '">' + ledNum + '</div>');
+                    ledNum++;
+                }
+                if (y < 0) {
+                    y = 0;
+                } else if (y >= height) {
+                    y = height - 1;
+                }
+                verticalDirection *= -1;
+            }
+
+
+            var socket = io();
+            socket.on('data', function(data) {
+                data = JSON.parse(data);
+                data.forEach(function(item, i) {
+                    $('#led' + i).css('background-color', 'rgb('+item[0]+','+item[1]+','+item[2]+')');
+                });
+            });
+        </script>
+    </body>
+</html>
