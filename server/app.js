@@ -1,5 +1,3 @@
-var serialport = require('serialport');
-var SerialPort = serialport.SerialPort;
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
@@ -19,27 +17,39 @@ http.listen(3000, function(){
     console.log('listening on *:3000');
 });
 
-var serialPort = new SerialPort('/dev/cu.usbmodem1411', {
-    baudrate: 115200,
-    parser: serialport.parsers.readline('\n')
-});
-
-serialPort.open(function(error) {
-    if (error) {
-        console.log('failed to open: ' + error);
-    } else {
-        serialPort.on('data', function(data) {
-            console.log('data received: ' + data);
-            sockets.forEach(function(socket) {
-                socket.emit('data', data);
+var noArduino = require('./noarduino.js');
+var serialport = require('serialport');
+var mySp;
+serialport.list(function (err, ports) {
+    ports.forEach(function(port) {
+        if (port.comName.indexOf('cu.usbmodem') > -1) {
+            mySp = new serialport.SerialPort('/dev/cu.usbmodem1411', {
+                baudrate: 115200,
+                parser: serialport.parsers.readline('\n')
             });
-        });
-    }
+        }
+    });
 });
-// var serialPort = require("serialport");
-// serialPort.list(function (err, ports) {
-//     ports.forEach(function(port) {
-//         console.log(port.comName);
-//         console.log(port.manufacturer);
-//     });
-// });
+if (mySp) {
+    mySp.open(function(error) {
+        console.log('arduino found');
+        if (error) {
+            console.log('failed to open: ' + error);
+        } else {
+            mySp.on('data', function(data) {
+                console.log('data received: ' + data);
+                sockets.forEach(function(socket) {
+                    socket.emit('data', data);
+                });
+            });
+        }
+    });
+} else {
+    console.log('no arduino');
+    noArduino.on('data', function(data) {
+        console.log('data received: ' + data);
+        sockets.forEach(function(socket) {
+            socket.emit('data', data);
+        });
+    })
+}
