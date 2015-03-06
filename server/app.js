@@ -37,7 +37,7 @@ if (mySp) {
             console.log('failed to open: ' + error);
         } else {
             mySp.on('data', function(data) {
-                console.log('data received: ' + data);
+                // console.log('data received: ' + data);
                 sockets.forEach(function(socket) {
                     socket.emit('data', data);
                 });
@@ -47,7 +47,7 @@ if (mySp) {
 } else {
     console.log('no arduino');
     noArduino.on('data', function(data) {
-        console.log('data received: ' + data);
+        // console.log('data received: ' + data);
         sockets.forEach(function(socket) {
             socket.emit('data', data);
         });

@@ -40,19 +40,26 @@ for (var i = 0; i < rows * cols; i++) {
     coordMap[col][row] = i;
 }
 
-function getCircleFrame() {
-    step++;
-    var maxSteps = diagonal * 1.8; //ensures that circle will grow at 1/3 pixel per step.
-    if (step > maxSteps || step < 0) {
-        step = 0;
+// FRAME FUNCTIONS
+function solidify(defaultColor) {
+    var data = coords.slice();
+
+    for (var i = 0; i < data.length; i++) {
+        data[i] = defaultColor.slice();
     }
 
-    console.log("MAXSTEPS : " + maxSteps);
-    var radius = diagonal * step / maxSteps;
-    var center = [3, 3];
+    return data;
+}
 
-    var defaultColor = [0, 61, 245];
-    var newColor = [245, 61, 0];
+var circleStep = 0;
+function getCircleFrame(center, newColor) {
+    circleStep++;
+    var maxSteps = diagonal * 10; //higher value = slower animation
+    if (circleStep > maxSteps || circleStep < 0) {
+        circleStep = 0;
+    }
+
+    var radius = diagonal * circleStep / maxSteps;
 
     var data = coords.slice();
 
@@ -60,7 +67,7 @@ function getCircleFrame() {
         for (var row = 0; row < coordMap[col].length; row++) {
             var distDiff = Math.abs(dist(center[0], center[1], col, row) - radius);
             var sqrtTwoOverTwo = ((Math.pow(2, (1/2)))/2);
-            var pixelColor = defaultColor;
+            var pixelColor = coords[coordMap[col][row]]; //old pixel color is stored in coords.
 
             if (distDiff <= sqrtTwoOverTwo) {
                 var r = Math.ceil((pixelColor[0] * distDiff/sqrtTwoOverTwo) + (newColor[0] * (1 - distDiff/sqrtTwoOverTwo)));
@@ -77,17 +84,33 @@ function getCircleFrame() {
     return data;
 }
 
-// DEFINES WHICH FRAME TO GENERATE
-var step = 0;
+// function getPacman() {
+//     pacmanStep++;
+//     var maxSteps = 255;
+//     if (pacmanStep > maxSteps || pacmanStep < 0) {
+//         pacmanStep = 0;
+//     }
+//
+//     var backgroundColor = [0, 0, 0];
+//
+//     if (pacmanStep < 32) {
+//
+//     }
+// }
 
 // CALCULATION OF FRAME
 function nextFrame() {
-    // fallback
-    var data = [[255, 0, 0], [0, 255, 0], [0, 0, 255], [255, 255, 0]];
+    // solid
+    coords = solidify([0, 61, 245]);
 
     // circle
-    data = getCircleFrame();
+    coords = getCircleFrame([4, 2], [245, 61, 0]);
 
-    appCb(JSON.stringify(data));
+    coords = getCircleFrame([2, 4], [0, 245, 61]);
+
+    //pacman
+    // data = getPacman();
+
+    appCb(JSON.stringify(coords));
     setTimeout(nextFrame, 30);
 }
