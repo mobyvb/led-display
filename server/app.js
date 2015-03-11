@@ -17,7 +17,7 @@ http.listen(3000, function(){
     console.log('listening on *:3000');
 });
 
-var noArduino = require('./noarduino.js');
+var noArduino = require('./noarduino/noarduino.js');
 var serialport = require('serialport');
 var mySp;
 serialport.list(function (err, ports) {
@@ -37,7 +37,6 @@ if (mySp) {
             console.log('failed to open: ' + error);
         } else {
             mySp.on('data', function(data) {
-                console.log('data received: ' + data);
                 sockets.forEach(function(socket) {
                     socket.emit('data', data);
                 });
@@ -47,7 +46,6 @@ if (mySp) {
 } else {
     console.log('no arduino');
     noArduino.on('data', function(data) {
-        console.log('data received: ' + data);
         sockets.forEach(function(socket) {
             socket.emit('data', data);
         });

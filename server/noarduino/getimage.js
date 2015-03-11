@@ -1,48 +1,12 @@
-var appCb;
 var fs = require('fs');
 var PNG = require('pngjs').PNG;
+var config = require('./config.js');
+var rows = config.rows;
+var cols = config.cols;
+var coords = config.coords;
+var coordMap = config.coordMap;
 
-module.exports = {
-    on: function(event, cb) {
-        if (event === 'data') {
-            appCb = cb;
-            nextFrame();
-        }
-    }
-}
-
-var rows = 7;
-var cols = 7;
-var coords = [];
-var coordMap = [];
-
-for (var i = 0; i < cols; i++) {
-    coordMap[i] = [];
-    for (var j = 0; j < rows; j++) {
-        coordMap[i][j] = 0;
-    }
-}
-
-for (var i = 0; i < rows * cols; i++) {
-    coords[i] = [0, 0, 0];
-
-    var col = Math.floor(i / rows);
-    var row = i % rows;
-
-    if (col % 2 == 0) {
-        row = rows - row - 1;
-    }
-
-    coordMap[col][row] = i;
-}
-
-function nextFrame() {
-    var data = coords;
-    appCb(JSON.stringify(data));
-    setTimeout(nextFrame, 30);
-}
-
-function showImage(image) {
+function getImage(image) {
     fs.createReadStream(image)
         .pipe(new PNG({
             filterType: 4
@@ -73,7 +37,7 @@ function showImage(image) {
                 coords[i][1] = Math.floor(coords[i][1] / pixPerLed);
                 coords[i][2] = Math.floor(coords[i][2] / pixPerLed);
             }
-            nextFrame();
         });
 }
-showImage('fez.png');
+
+module.exports = getImage;
