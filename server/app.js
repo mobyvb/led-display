@@ -23,31 +23,32 @@ var mySp;
 serialport.list(function (err, ports) {
     ports.forEach(function(port) {
         if (port.comName.indexOf('cu.usbmodem') > -1) {
-            mySp = new serialport.SerialPort('/dev/cu.usbmodem1411', {
+            mySp = new serialport.SerialPort(port.comName, {
                 baudrate: 115200,
                 parser: serialport.parsers.readline('\n')
             });
         }
     });
-});
-if (mySp) {
-    mySp.open(function(error) {
-        console.log('arduino found');
-        if (error) {
-            console.log('failed to open: ' + error);
-        } else {
-            mySp.on('data', function(data) {
-                sockets.forEach(function(socket) {
-                    socket.emit('data', data);
+
+    if (mySp) {
+        mySp.open(function(error) {
+            console.log('arduino found');
+            if (error) {
+                console.log('failed to open: ' + error);
+            } else {
+                mySp.on('data', function(data) {
+                    sockets.forEach(function(socket) {
+                        socket.emit('data', data);
+                    });
                 });
-            });
-        }
-    });
-} else {
-    console.log('no arduino');
-    noArduino.on('data', function(data) {
-        sockets.forEach(function(socket) {
-            socket.emit('data', data);
+            }
         });
-    })
-}
+    } else {
+        console.log('no arduino');
+        noArduino.on('data', function(data) {
+            sockets.forEach(function(socket) {
+                socket.emit('data', data);
+            });
+        })
+    }
+});
