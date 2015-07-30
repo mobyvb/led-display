@@ -3,7 +3,7 @@ A library for displaying patterns on an LED grid and viewing simulations of thos
 
 ##Cloning and Installing
 ```
-$ git@github.com:mobyvb/led-display.git
+$ git clone git@github.com:mobyvb/led-display.git
 $ cd led-display
 $ npm install
 ```
